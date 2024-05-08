@@ -1,42 +1,38 @@
-// SignInScreen.js
-
 import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, Alert } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const SignInScreen = () => {
   const navigation = useNavigation();
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const handleSignIn = async () => {
     try {
-      // Assuming this is the correct endpoint for your login
-      const response = await fetch("http://192.168.84.45:8000/login/", {
+      const response = await fetch("http://192.168.84.45:8000/login", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
+          "Content-Type": "application/x-www-form-urlencoded",
         },
-        body: JSON.stringify({
-          username: username,
-          password: password,
-        }),
+        body: `grant_type=&username=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}&scope=&client_id=&client_secret=`,
       });
-
+  
       if (response.ok) {
-        // Navigate to the Dashboard screen if login is successful
-        navigation.navigate("Dashboard");
+        const data = await response.json();
+        // Save the access token in AsyncStorage
+        await AsyncStorage.setItem('token', data.access_token);
+        console.log("Access Token:", data.access_token);
+        navigation.navigate("Dashboard"); // Redirect to Dashboard
       } else {
-        // Handle login failure
         Alert.alert("Login failed", "Please check your credentials and try again.");
       }
     } catch (error) {
-      // Handle login error
       console.error("Error logging in:", error);
       Alert.alert("Login failed", "Please try again.");
     }
   };
-
+  
   const handleRegister = () => {
     // Navigate to the Register screen
     navigation.navigate("Register");
@@ -49,9 +45,9 @@ const SignInScreen = () => {
       </Text>
       <TextInput
         style={{ height: 40, width: '80%', borderColor: '#9BB399', borderWidth: 1, marginBottom: 20, backgroundColor: '#FFF', paddingHorizontal: 10, borderRadius: 10 }}
-        placeholder="Enter your username"
-        value={username}
-        onChangeText={(text) => setUsername(text)}
+        placeholder="Enter your email"
+        value={email}
+        onChangeText={(text) => setEmail(text)}
       />
       <TextInput
         style={{ height: 40, width: '80%', borderColor: '#9BB399', borderWidth: 1, marginBottom: 20, backgroundColor: '#FFF', paddingHorizontal: 10, borderRadius: 10 }}

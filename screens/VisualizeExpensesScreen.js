@@ -35,7 +35,7 @@ const VisualizeExpensesScreen = () => {
       <Text style={{ fontSize: 18, textAlign: "center", marginBottom: 20, color: "#FFF" }}>
         Gain insights into your habits with our interactive pie chart. See where your money is going and make informed decisions to manage your expenses effectively.
       </Text>
-      <View style={{ position: 'absolute', bottom: 20, flexDirection: 'row', justifyContent: 'space-between', width: '80%' }}>
+      <View style={{ position: 'absolute', bottom: 50, flexDirection: 'row', justifyContent: 'space-between', width: '80%' }}>
         <TouchableOpacity onPress={handleBack}>
           <Text style={{ fontSize: 16, color: '#FFF', textDecorationLine: 'underline' }}>Back</Text>
         </TouchableOpacity>

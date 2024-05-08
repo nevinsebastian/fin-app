@@ -22,7 +22,7 @@ const OnboardingScreen = () => {
       <Text style={{ fontSize: 18, textAlign: 'center', marginBottom: 20, color: '#FFF' }}>
         Start your financial journey by tracking your savings. Set goals, monitor your progress, and watch your savings grow over time.
       </Text>
-      <View style={{ position: 'absolute', bottom: 20, flexDirection: 'row', justifyContent: 'space-between', width: '80%' }}>
+      <View style={{ position: 'absolute', bottom: 50, flexDirection: 'row', justifyContent: 'space-between', width: '80%' }}>
         <TouchableOpacity >
           <Text style={{ fontSize: 16, color: '#FFF', textDecorationLine: 'underline' }}>Back</Text>
         </TouchableOpacity>
