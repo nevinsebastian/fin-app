@@ -9,7 +9,7 @@ const RegisterScreen = () => {
   const [password, setPassword] = useState("");
   const handleRegister = async () => {
     try {
-      const response = await fetch("http://192.168.84.45:8000/users/", {
+      const response = await fetch("http://192.168.80.45:8000/users/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

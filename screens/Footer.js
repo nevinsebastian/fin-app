@@ -1,16 +1,23 @@
 // Footer.js
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import Icon from "react-native-vector-icons/FontAwesome";
 
 const Footer = ({ selectedTab, handleTabPress }) => {
+  const navigation = useNavigation();
+
+  const handleChartPress = () => {
+    navigation.navigate('ChartDashboard');
+  };
+
   return (
     <View style={styles.footer}>
       <TouchableOpacity onPress={() => handleTabPress("home")} style={[styles.tab, selectedTab === "home" && styles.selectedTab]}>
         <Icon name="home" size={24} color={selectedTab === "home" ? "#6A0DAD" : "#000"} />
         <Text style={[styles.tabText, selectedTab === "home" && styles.selectedTabText]}>Home</Text>
       </TouchableOpacity>
-      <TouchableOpacity onPress={() => handleTabPress("chart")} style={[styles.tab, selectedTab === "chart" && styles.selectedTab]}>
+      <TouchableOpacity onPress={handleChartPress} style={[styles.tab, selectedTab === "chart" && styles.selectedTab]}>
         <Icon name="bar-chart" size={24} color={selectedTab === "chart" ? "#6A0DAD" : "#000"} />
         <Text style={[styles.tabText, selectedTab === "chart" && styles.selectedTabText]}>Chart</Text>
       </TouchableOpacity>

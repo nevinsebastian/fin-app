@@ -3,6 +3,18 @@ import React from "react";
 import { Modal, Text, TextInput, Button, View, TouchableWithoutFeedback, StyleSheet } from "react-native";
 
 const CategoryModal = ({ modalVisible, setModalVisible, budgetData, setBudgetData, handleConfirmAddCategory }) => {
+  const isEditing = !!budgetData.id;
+
+  const handleConfirm = () => {
+    if (isEditing) {
+      // Update existing category
+      handleConfirmAddCategory();
+    } else {
+      // Add new category
+      handleConfirmAddCategory();
+    }
+  };
+
   return (
     <Modal
       animationType="slide"
@@ -16,7 +28,7 @@ const CategoryModal = ({ modalVisible, setModalVisible, budgetData, setBudgetDat
         <View style={styles.modalView}>
           <TouchableWithoutFeedback>
             <View style={styles.modalContent}>
-              <Text style={styles.modalTitle}>{budgetData.id ? "Edit Category" : "Add Category"}</Text>
+              <Text style={styles.modalTitle}>{isEditing ? "Edit Category" : "Add Category"}</Text>
               <TextInput
                 style={styles.input}
                 placeholder="Category Name"
@@ -30,7 +42,7 @@ const CategoryModal = ({ modalVisible, setModalVisible, budgetData, setBudgetDat
                 value={budgetData.budget}
                 onChangeText={(text) => setBudgetData({ ...budgetData, budget: text })}
               />
-              <Button title={budgetData.id ? "Update Category" : "Add Category"} onPress={handleConfirmAddCategory} />
+              <Button title={isEditing ? "Update Category" : "Add Category"} onPress={handleConfirm} />
             </View>
           </TouchableWithoutFeedback>
         </View>
