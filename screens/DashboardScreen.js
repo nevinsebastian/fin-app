@@ -20,9 +20,9 @@ const DashboardScreen = () => {
     name: '',
   });
   const [categories, setCategories] = useState([
-    { id: 1, name: 'Food', budget: 200, remaining_budget: 100, color: '#FF6347' },
-    { id: 2, name: 'Transport', budget: 150, remaining_budget: 50, color: '#4682B4' },
-    { id: 3, name: 'Entertainment', budget: 100, remaining_budget: 80, color: '#32CD32' },
+    { id: 1, name: 'Food', budget: 200, spent: 100, remaining_budget: 100, color: '#FF6347' },
+    { id: 2, name: 'Transport', budget: 150, spent: 50, remaining_budget: 50, color: '#4682B4' },
+    { id: 3, name: 'Entertainment', budget: 100, spent: 20, remaining_budget: 80, color: '#32CD32' },
   ]);
   const [monthlyBudget, setMonthlyBudget] = useState([
     { id: 1, month: 5, year: 2024, budget: 500, balance: 300 },
@@ -32,12 +32,7 @@ const DashboardScreen = () => {
 
   useEffect(() => {
     // Calculate spent amount for each category
-    const spentAmounts = categories.map((category) => {
-      const spent = monthlyBudget.reduce((acc, budget) => {
-        return acc + (budget.month === parseInt(moment().format("M")) && budget.year === parseInt(moment().format("YYYY")) ? budget.balance : 0);
-      }, 0);
-      return spent;
-    });
+    const spentAmounts = categories.map((category) => category.spent);
 
     // Update Pie Chart data
     const data = categories.map((category, index) => ({
@@ -46,7 +41,7 @@ const DashboardScreen = () => {
       color: category.color,
     }));
     setPieChartData(data);
-  }, [categories, monthlyBudget]);
+  }, [categories]);
 
   const handleTabPress = (tab) => {
     setSelectedTab(tab);
@@ -86,22 +81,12 @@ const DashboardScreen = () => {
       if (item.id === budgetData.id) {
         const spentAmount = parseFloat(budgetData.budget);
         const remainingBudget = item.remaining_budget - spentAmount;
-        return { ...item, remaining_budget: remainingBudget };
+        return { ...item, spent: spentAmount, remaining_budget: remainingBudget };
       }
       return item;
     });
 
     setCategories(updatedCategories);
-
-    // Update monthlyBudget with the new spent amount
-    const updatedMonthlyBudget = monthlyBudget.map((budget) => {
-      if (budget.id === budgetData.id) {
-        return { ...budget, balance: parseFloat(budgetData.budget) };
-      }
-      return budget;
-    });
-    setMonthlyBudget(updatedMonthlyBudget);
-
     setModalCategoryVisible(false);
   };
 
@@ -120,6 +105,7 @@ const DashboardScreen = () => {
         id: categories.length + 1,
         name: budgetData.name,
         budget: parseFloat(budgetData.budget),
+        spent: 0,
         remaining_budget: parseFloat(budgetData.budget),
         color: '#' + (0x1000000 + Math.random() * 0xffffff).toString(16).substr(1, 6), // Random color
       },
@@ -156,7 +142,7 @@ const DashboardScreen = () => {
               <Text style={styles.month}>Month: {moment().month(budget.month - 1).format('MMMM')}</Text>
               <Text style={styles.month}>Year: {budget.year}</Text>
               <Text style={styles.monthExpense}>Budget: ${budget.budget}</Text>
-              <Text style={styles.monthExpense}>Balance: ${budget.balance}</Text>
+              <Text style={styles.monthExpense}>Spent: ${budget.balance}</Text>
             </View>
           ))}
         </ScrollView>
@@ -175,6 +161,7 @@ const DashboardScreen = () => {
               <View>
                 <Text style={styles.categoryName}>{category.name}</Text>
                 <Text style={styles.categoryBudget}>Budget: ${category.budget}</Text>
+                <Text style={styles.categoryBudget}>Spent: ${category.spent}</Text>
                 <Text style={styles.categoryBudget}>Remaining: ${category.remaining_budget}</Text>
               </View>
             </TouchableOpacity>
@@ -210,7 +197,7 @@ const DashboardScreen = () => {
               style={styles.input}
               placeholder="Enter Spent Amount"
               keyboardType="numeric"
-              value={budgetData.budget}
+              value={budgetData.budget.toString()}
               onChangeText={(text) => setBudgetData({ ...budgetData, budget: text })}
             />
             <View style={{ flexDirection: 'row', justifyContent: 'space-around', width: '100%' }}>
