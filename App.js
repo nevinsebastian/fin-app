@@ -9,7 +9,7 @@ import RegisterScreen from "./screens/RegisterScreen";
 import SignInScreen from "./screens/SignInScreen"; 
 import VisualizeExpensesScreen from "./screens/VisualizeExpensesScreen";
 import DashboardScreen from "./screens/DashboardScreen";
-import EditCategoryScreen from "./screens/EditCategoryScreen";
+import AboutScreen from "./screens/AboutScreen";
 
 const Stack = createStackNavigator();
 
@@ -23,7 +23,7 @@ export default function App() {
           <Stack.Screen name="SignIn" component={SignInScreen} /> 
           <Stack.Screen name="VisualizeExpenses" component={VisualizeExpensesScreen} />
           <Stack.Screen name="Dashboard" component={DashboardScreen} />
-          <Stack.Screen name="EditCategory" component={EditCategoryScreen} />
+          <Stack.Screen name="About" component={AboutScreen} />
         </Stack.Navigator>
       </NavigationContainer>
     </NativeBaseProvider>

@@ -3,6 +3,7 @@ import { View, Text, ScrollView, SafeAreaView, StyleSheet, Button, TouchableOpac
 import Icon from "react-native-vector-icons/FontAwesome";
 import { PieChart } from 'react-native-chart-kit';
 import moment from 'moment';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import Footer from './Footer';
 import BudgetModal from './BudgetModal';
 import NewCategoryModal from './NewCategoryModal';
@@ -36,6 +37,9 @@ const DashboardScreen = () => {
   useEffect(() => {
     // Calculate spent amount for each category
     const spentAmounts = categories.map((category) => category.spent);
+    const todaySpent = spentAmounts.reduce((acc, curr) => acc + curr, 0);
+
+    setBalance(todaySpent);
 
     // Update Pie Chart data
     const data = categories.map((category, index) => ({
@@ -49,6 +53,16 @@ const DashboardScreen = () => {
   useEffect(() => {
     checkLowRemainingBudget();
   }, [categories]);
+
+  useEffect(() => {
+    // Load data when component mounts
+    loadData();
+  }, []);
+
+  useEffect(() => {
+    // Save data whenever categories or monthlyBudget change
+    saveData();
+  }, [categories, monthlyBudget]);
 
   const checkLowRemainingBudget = () => {
     categories.forEach(category => {
@@ -144,6 +158,30 @@ const DashboardScreen = () => {
   const handleConfirmAddActivity = () => {
     // Add activity functionality here
     setModalActivityVisible(false);
+  };
+
+  const saveData = async () => {
+    try {
+      const jsonCategories = JSON.stringify(categories);
+      const jsonMonthlyBudget = JSON.stringify(monthlyBudget);
+      await AsyncStorage.setItem('@categories', jsonCategories);
+      await AsyncStorage.setItem('@monthlyBudget', jsonMonthlyBudget);
+    } catch (error) {
+      console.error('Error saving data: ', error);
+    }
+  };
+
+  const loadData = async () => {
+    try {
+      const jsonCategories = await AsyncStorage.getItem('@categories');
+      const jsonMonthlyBudget = await AsyncStorage.getItem('@monthlyBudget');
+      if (jsonCategories !== null && jsonMonthlyBudget !== null) {
+        setCategories(JSON.parse(jsonCategories));
+        setMonthlyBudget(JSON.parse(jsonMonthlyBudget));
+      }
+    } catch (error) {
+      console.error('Error loading data: ', error);
+    }
   };
 
   return (

@@ -1,24 +1,30 @@
+// Footer.js
+
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Icon from "react-native-vector-icons/FontAwesome";
 
-const Footer = ({ selectedTab, handleTabPress, categories }) => {
+const Footer = ({ selectedTab, handleTabPress }) => {
   const navigation = useNavigation();
 
-  const handleChartPress = () => {
-    navigation.navigate('EditCategory', { categories: categories });
+  const handleHomePress = () => {
+    navigation.navigate('Dashboard');
+  };
+
+  const handleAboutPress = () => {
+    navigation.navigate('About');
   };
 
   return (
     <View style={styles.footer}>
-      <TouchableOpacity onPress={() => handleTabPress("home")} style={[styles.tab, selectedTab === "home" && styles.selectedTab]}>
+      <TouchableOpacity onPress={handleHomePress} style={[styles.tab, selectedTab === "home" && styles.selectedTab]}>
         <Icon name="home" size={24} color={selectedTab === "home" ? "#6A0DAD" : "#000"} />
         <Text style={[styles.tabText, selectedTab === "home" && styles.selectedTabText]}>Home</Text>
       </TouchableOpacity>
-      <TouchableOpacity onPress={handleChartPress} style={[styles.tab, selectedTab === "EditCategory" && styles.selectedTab]}>
-        <Icon name="edit" size={24} color={selectedTab === "EditCategory" ? "#6A0DAD" : "#000"} />
-        <Text style={[styles.tabText, selectedTab === "chart" && styles.selectedTabText]}>Chart</Text>
+      <TouchableOpacity onPress={handleAboutPress} style={[styles.tab, selectedTab === "About" && styles.selectedTab]}>
+        <Icon name="info" size={24} color={selectedTab === "About" ? "#6A0DAD" : "#000"} />
+        <Text style={[styles.tabText, selectedTab === "About" && styles.selectedTabText]}>About</Text>
       </TouchableOpacity>
     </View>
   );
