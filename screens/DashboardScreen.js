@@ -1,17 +1,20 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, ScrollView, SafeAreaView, StyleSheet, Button, TouchableOpacity, Modal, TextInput } from "react-native";
+import { View, Text, ScrollView, SafeAreaView, StyleSheet, Button, TouchableOpacity, Modal, TextInput, Alert } from "react-native";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { PieChart } from 'react-native-chart-kit';
 import moment from 'moment';
 import Footer from './Footer';
 import BudgetModal from './BudgetModal';
+import NewCategoryModal from './NewCategoryModal';
+import EditCategoryModal from './EditCategoryModal';
 import ActivityModal from './ActivityModal';
 
 const DashboardScreen = () => {
   const [selectedTab, setSelectedTab] = useState("home");
   const [balance, setBalance] = useState(0);
   const [modalBudgetVisible, setModalBudgetVisible] = useState(false);
-  const [modalCategoryVisible, setModalCategoryVisible] = useState(false);
+  const [modalNewCategoryVisible, setModalNewCategoryVisible] = useState(false);
+  const [modalEditCategoryVisible, setModalEditCategoryVisible] = useState(false);
   const [modalActivityVisible, setModalActivityVisible] = useState(false);
   const [budgetData, setBudgetData] = useState({
     month: '',
@@ -43,6 +46,23 @@ const DashboardScreen = () => {
     setPieChartData(data);
   }, [categories]);
 
+  useEffect(() => {
+    checkLowRemainingBudget();
+  }, [categories]);
+
+  const checkLowRemainingBudget = () => {
+    categories.forEach(category => {
+      if (category.remaining_budget <= 10) {
+        Alert.alert(
+          'Low Remaining Budget',
+          `Remaining budget for ${category.name} is low. Consider updating the budget.`,
+          [{ text: 'OK', onPress: () => console.log('OK Pressed') }],
+          { cancelable: false }
+        );
+      }
+    });
+  };
+
   const handleTabPress = (tab) => {
     setSelectedTab(tab);
   };
@@ -71,50 +91,50 @@ const DashboardScreen = () => {
     });
   };
 
-  const handleCategoryPress = (category) => {
-    setBudgetData({ ...category });
-    setModalCategoryVisible(true);
+  const handleAddCategory = () => {
+    setModalNewCategoryVisible(true);
   };
 
-  const handleUpdateCategory = () => {
+  const handleConfirmAddCategory = (name, budget) => {
+    setCategories([
+      ...categories,
+      {
+        id: categories.length + 1,
+        name: name,
+        budget: parseFloat(budget),
+        spent: 0,
+        remaining_budget: parseFloat(budget),
+        color: '#' + (0x1000000 + Math.random() * 0xffffff).toString(16).substr(1, 6), // Random color
+      },
+    ]);
+    setModalNewCategoryVisible(false);
+  };
+
+  const handleCategoryPress = (category) => {
+    setBudgetData({ ...category });
+    setModalEditCategoryVisible(true);
+  };
+
+  const handleUpdateCategory = (id, spent) => {
     const updatedCategories = categories.map((item) => {
-      if (item.id === budgetData.id) {
-        const spentAmount = parseFloat(budgetData.budget);
+      if (item.id === id) {
+        const spentAmount = parseFloat(spent);
         const remainingBudget = item.remaining_budget - spentAmount;
-        return { ...item, spent: spentAmount, remaining_budget: remainingBudget };
+        if (remainingBudget <= 10) {
+          Alert.alert(
+            'Very Low Remaining Budget',
+            `Remaining budget for ${item.name} is very low. Consider updating the budget.`,
+            [{ text: 'OK', onPress: () => console.log('OK Pressed') }],
+            { cancelable: false }
+          );
+        }
+        return { ...item, spent: item.spent + spentAmount, remaining_budget: remainingBudget };
       }
       return item;
     });
 
     setCategories(updatedCategories);
-    setModalCategoryVisible(false);
-  };
-
-  const handleAddCategory = () => {
-    setBudgetData({
-      name: '',
-      budget: '',
-    });
-    setModalCategoryVisible(true);
-  };
-
-  const handleConfirmAddCategory = () => {
-    setCategories([
-      ...categories,
-      {
-        id: categories.length + 1,
-        name: budgetData.name,
-        budget: parseFloat(budgetData.budget),
-        spent: 0,
-        remaining_budget: parseFloat(budgetData.budget),
-        color: '#' + (0x1000000 + Math.random() * 0xffffff).toString(16).substr(1, 6), // Random color
-      },
-    ]);
-    setModalCategoryVisible(false);
-    setBudgetData({
-      name: '',
-      budget: '',
-    });
+    setModalEditCategoryVisible(false);
   };
 
   const handleActivityPress = () => {
@@ -132,7 +152,7 @@ const DashboardScreen = () => {
         <View style={styles.topSection}>
           <View style={styles.todaySection}>
             <Text style={styles.todayText}>Today</Text>
-            <Text style={styles.todayExpenseText}>${balance}</Text>
+            <Text style={styles.todayExpenseText}>₹{balance}</Text>
           </View>
           <Button title="Set Budget" onPress={handleSetBudget} />
         </View>
@@ -141,8 +161,8 @@ const DashboardScreen = () => {
             <View key={index} style={styles.monthlyBudgetCard}>
               <Text style={styles.month}>Month: {moment().month(budget.month - 1).format('MMMM')}</Text>
               <Text style={styles.month}>Year: {budget.year}</Text>
-              <Text style={styles.monthExpense}>Budget: ${budget.budget}</Text>
-              <Text style={styles.monthExpense}>Spent: ${budget.balance}</Text>
+              <Text style={styles.monthExpense}>Budget: ₹{budget.budget}</Text>
+              <Text style={styles.monthExpense}>Spent: ₹{budget.balance}</Text>
             </View>
           ))}
         </ScrollView>
@@ -160,9 +180,9 @@ const DashboardScreen = () => {
               </View>
               <View>
                 <Text style={styles.categoryName}>{category.name}</Text>
-                <Text style={styles.categoryBudget}>Budget: ${category.budget}</Text>
-                <Text style={styles.categoryBudget}>Spent: ${category.spent}</Text>
-                <Text style={styles.categoryBudget}>Remaining: ${category.remaining_budget}</Text>
+                <Text style={styles.categoryBudget}>Budget: ₹{category.budget}</Text>
+                <Text style={styles.categoryBudget}>Spent: ₹{category.spent}</Text>
+                <Text style={styles.categoryBudget}>Remaining: ₹{category.remaining_budget}</Text>
               </View>
             </TouchableOpacity>
           ))}
@@ -187,35 +207,25 @@ const DashboardScreen = () => {
       <Modal
         animationType="slide"
         transparent={true}
-        visible={modalCategoryVisible}
-        onRequestClose={() => setModalCategoryVisible(false)}
+        visible={modalNewCategoryVisible}
+        onRequestClose={() => setModalNewCategoryVisible(false)}
       >
-        <View style={styles.centeredView}>
-          <View style={styles.modalView}>
-            <Text style={styles.modalText}>Edit Category</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Enter Spent Amount"
-              keyboardType="numeric"
-              value={budgetData.budget.toString()}
-              onChangeText={(text) => setBudgetData({ ...budgetData, budget: text })}
-            />
-            <View style={{ flexDirection: 'row', justifyContent: 'space-around', width: '100%' }}>
-              <TouchableOpacity
-                style={{ ...styles.openButton, backgroundColor: "#6A0DAD" }}
-                onPress={handleUpdateCategory}
-              >
-                <Text style={styles.textStyle}>Update Category</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={{ ...styles.openButton, backgroundColor: "#6A0DAD" }}
-                onPress={() => setModalCategoryVisible(false)}
-              >
-                <Text style={styles.textStyle}>Cancel</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
+        <NewCategoryModal
+          setModalNewCategoryVisible={setModalNewCategoryVisible}
+          handleConfirmAddCategory={handleConfirmAddCategory}
+        />
+      </Modal>
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalEditCategoryVisible}
+        onRequestClose={() => setModalEditCategoryVisible(false)}
+      >
+        <EditCategoryModal
+          setModalEditCategoryVisible={setModalEditCategoryVisible}
+          budgetData={budgetData}
+          handleUpdateCategory={handleUpdateCategory}
+        />
       </Modal>
       <Modal
         animationType="slide"
@@ -347,50 +357,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginLeft: 10,
     color: '#333',
-  },
-  centeredView: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    marginTop: 22
-  },
-  modalView: {
-    margin: 20,
-    backgroundColor: "white",
-    borderRadius: 20,
-    padding: 35,
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5
-  },
-  openButton: {
-    backgroundColor: "#F194FF",
-    borderRadius: 20,
-    padding: 10,
-    elevation: 2
-  },
-  textStyle: {
-    color: "white",
-    fontWeight: "bold",
-    textAlign: "center"
-  },
-  modalText: {
-    marginBottom: 15,
-    textAlign: "center"
-  },
-  input: {
-    height: 40,
-    width: 200,
-    margin: 12,
-    borderWidth: 1,
-    padding: 10,
-    borderRadius: 10
   },
 });
 
