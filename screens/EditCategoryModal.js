@@ -22,6 +22,7 @@ const EditCategoryModal = ({ setModalEditCategoryVisible, budgetData, handleUpda
           <TextInput
             style={styles.input}
             placeholder="Enter Spent Amount"
+            placeholderTextColor="#A9A9A9"
             keyboardType="numeric"
             value={spent}
             onChangeText={(text) => setSpent(text)}
@@ -88,7 +89,7 @@ const styles = StyleSheet.create({
     margin: 12,
     borderWidth: 1,
     padding: 10,
-    borderRadius: 10
+    borderRadius: 10,
   },
 });
 
