@@ -9,6 +9,7 @@ import BudgetModal from './BudgetModal';
 import NewCategoryModal from './NewCategoryModal';
 import EditCategoryModal from './EditCategoryModal';
 import ActivityModal from './ActivityModal';
+import EmiModal from './EmiModal';
 
 const DashboardScreen = () => {
   const [selectedTab, setSelectedTab] = useState("home");
@@ -17,6 +18,7 @@ const DashboardScreen = () => {
   const [modalNewCategoryVisible, setModalNewCategoryVisible] = useState(false);
   const [modalEditCategoryVisible, setModalEditCategoryVisible] = useState(false);
   const [modalActivityVisible, setModalActivityVisible] = useState(false);
+  const [modalReminderVisible, setModalReminderVisible] = useState(false);
   const [budgetData, setBudgetData] = useState({
     month: '',
     year: '',
@@ -33,15 +35,14 @@ const DashboardScreen = () => {
     { id: 2, month: 4, year: 2024, budget: 600, balance: 450 },
   ]);
   const [pieChartData, setPieChartData] = useState([]);
-
+  const [emiData, setEmiData] = useState([]);
+  
   useEffect(() => {
-    // Calculate spent amount for each category
     const spentAmounts = categories.map((category) => category.spent);
     const todaySpent = spentAmounts.reduce((acc, curr) => acc + curr, 0);
 
     setBalance(todaySpent);
 
-    // Update Pie Chart data
     const data = categories.map((category, index) => ({
       name: category.name,
       budget: spentAmounts[index],
@@ -55,12 +56,10 @@ const DashboardScreen = () => {
   }, [categories]);
 
   useEffect(() => {
-    // Load data when component mounts
     loadData();
   }, []);
 
   useEffect(() => {
-    // Save data whenever categories or monthlyBudget change
     saveData();
   }, [categories, monthlyBudget]);
 
@@ -118,7 +117,7 @@ const DashboardScreen = () => {
         budget: parseFloat(budget),
         spent: 0,
         remaining_budget: parseFloat(budget),
-        color: '#' + (0x1000000 + Math.random() * 0xffffff).toString(16).substr(1, 6), // Random color
+        color: '#' + (0x1000000 + Math.random() * 0xffffff).toString(16).substr(1, 6),
       },
     ]);
     setModalNewCategoryVisible(false);
@@ -156,8 +155,16 @@ const DashboardScreen = () => {
   };
 
   const handleConfirmAddActivity = () => {
-    // Add activity functionality here
     setModalActivityVisible(false);
+  };
+
+  const handleReminderPress = () => {
+    setModalReminderVisible(true);
+  };
+
+  const handleConfirmAddEmi = (emi) => {
+    setEmiData([...emiData, emi]);
+    setModalReminderVisible(false);
   };
 
   const saveData = async () => {
@@ -225,6 +232,29 @@ const DashboardScreen = () => {
             </TouchableOpacity>
           ))}
         </ScrollView>
+        <TouchableOpacity onPress={handleReminderPress} style={[styles.categoryCard, {backgroundColor: '#FF6347'}]}>
+          <View style={{ backgroundColor: '#FF6347', borderRadius: 100, padding: 10 }}>
+            <Icon name="bell" size={24} color="#FFF" />
+          </View>
+          <View>
+            <Text style={[styles.categoryName, {color: '#FFF'}]}>EMI & Loan Reminder</Text>
+            <Text style={[styles.categoryBudget, {color: '#FFF'}]}>Set reminders for your EMIs and loans</Text>
+          </View>
+        </TouchableOpacity>
+        <ScrollView style={{ paddingHorizontal: 20 }}>
+          {emiData.map((emi, index) => (
+            <TouchableOpacity key={index} style={[styles.categoryCard, {backgroundColor: '#FF6347'}]}>
+              <View style={{ backgroundColor: '#FF6347', borderRadius: 100, padding: 10 }}>
+                <Icon name="bell" size={24} color="#FFF" />
+              </View>
+              <View>
+                <Text style={[styles.categoryName, {color: '#FFF'}]}>{emi.heading}</Text>
+                <Text style={[styles.categoryBudget, {color: '#FFF'}]}>Amount: ₹{emi.amount}</Text>
+                <Text style={[styles.categoryBudget, {color: '#FFF'}]}>Date: {emi.date}</Text>
+              </View>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
         <View style={styles.chartContainer}>
           <ChartDashboard categories={categories} pieChartData={pieChartData} />
         </View>
@@ -274,6 +304,19 @@ const DashboardScreen = () => {
         <ActivityModal
           setModalActivityVisible={setModalActivityVisible}
           handleConfirmAddActivity={handleConfirmAddActivity}
+        />
+      </Modal>
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalReminderVisible}
+        onRequestClose={() => setModalReminderVisible(false)}
+      >
+        <EmiModal
+          setModalEmiVisible={setModalReminderVisible}
+          emiData={emiData}
+          setEmiData={setEmiData}
+          handleConfirmAddEmi={handleConfirmAddEmi}
         />
       </Modal>
       <Footer selectedTab={selectedTab} handleTabPress={handleTabPress} />
@@ -363,7 +406,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   chart: {
-    backgroundColor: 'transparent', // Remove background color to avoid overlay
+    backgroundColor: 'transparent',
   },
   categoryHeading: {
     fontSize: 20,
